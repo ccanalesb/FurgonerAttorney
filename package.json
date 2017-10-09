@@ -1,22 +1,33 @@
 {
-	"name": "FurgonerAttorney",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"start": "node node_modules/react-native/local-cli/cli.js start",
-		"test": "jest"
-	},
-	"dependencies": {
-		"react": "16.0.0-alpha.12",
-		"react-native": "0.48.4"
-	},
-	"devDependencies": {
-		"babel-jest": "21.2.0",
-		"babel-preset-react-native": "4.0.0",
-		"jest": "21.2.1",
-		"react-test-renderer": "16.0.0-alpha.12"
-	},
-	"jest": {
-		"preset": "react-native"
-	}
+  "name": "FurgonerAttorney",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "antd-mobile": "^1.6.11",
+    "babel-plugin-import": "^1.6.0",
+    "buffer": "^5.0.8",
+    "firebase": "^4.5.0",
+    "react": "16.0.0-alpha.12",
+    "react-native": "0.48.4",
+    "react-native-keyboard-aware-scroll-view": "^0.3.0",
+    "react-native-loading-spinner-overlay": "^0.5.2",
+    "react-native-maps": "^0.16.4",
+    "react-native-prompt": "^1.0.0",
+    "react-native-router-flux": "^4.0.0-beta.21",
+    "react-native-sha256": "^1.1.1",
+    "react-native-uuid": "^1.4.9"
+  },
+  "devDependencies": {
+    "babel-jest": "21.2.0",
+    "babel-preset-react-native": "4.0.0",
+    "jest": "21.2.1",
+    "react-test-renderer": "16.0.0-alpha.12"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
 }

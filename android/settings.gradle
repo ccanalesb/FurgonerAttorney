@@ -1,3 +1,7 @@
 rootProject.name = 'FurgonerAttorney'
+include ':react-native-sha256'
+project(':react-native-sha256').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sha256/android')
+include ':react-native-maps'
+project(':react-native-maps').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-maps/lib/android')
 
 include ':app'
