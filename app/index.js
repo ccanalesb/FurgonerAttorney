@@ -12,6 +12,7 @@ import DrawerContent from './components/drawer/DrawerContent';
 import ShowMap  from './components/ShowMap'
 import SchoolBus  from './components/SchoolBus'
 import PersonalInfo  from './components/PersonalInfo'
+console.disableYellowBox = true
 export default class FurgonerAttorney extends Component {
     render(){
         return (

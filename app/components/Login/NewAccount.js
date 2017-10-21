@@ -10,7 +10,7 @@ import {
     Button,
 KeyboardAvoidingView  } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-
+import { sha256 } from 'react-native-sha256';
 import { Actions } from 'react-native-router-flux';
 import { firebaseRef } from '../../services/firebase.js'
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -34,20 +34,27 @@ export default class NewAccount extends Component {
             firebaseRef.auth().createUserWithEmailAndPassword(email, password)
             .then((result) => {
                 firebaseRef.auth().onAuthStateChanged((user) => {
-                    if (user) {
-                        firebaseRef.database().ref('School_bus/' + user.uid).set({
-                            latitude: 0,
-                            longitude: 0,
-                          });
-                        Actions.main()
-                        this.setState({visible:false})
                     // User is signed in.
+                    if (user) {
+                        var user_uid = user.uid
+                        var user_email = user.email
+                        sha256(user_email).then( hash => {
+                            console.log(user_email)
+                            firebaseRef.database().ref('Attorney/' + hash).set({
+                                uid: user_uid
+                            });
+                            firebaseRef.database().ref('User/' + user_uid).set({
+                                type: "attorney"
+                            });
+                            Actions.main()
+                            this.setState({visible:false})
+                        })
                     } else {
+                        // No user is signed in.
                         console.log("no pasó na")
                         alert("Se creó la cuenta, pero no se pudo conectar al usuario")
                         this.setState({visible:false})
                         Actions.login()
-                    // No user is signed in.
                     }
                 });
             })

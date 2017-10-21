@@ -26,8 +26,8 @@ export default class LoginWrapper extends Component {
         let email = this.state.email
         let password = this.state.password
         if(email == "" || password == ""){
-            email = "canaleschiko@gmail.com"
-            password = "123456"
+            email = "ccanalesbarra@gmail.com"
+            password = "chiko1993"
         }
         console.log(email, password)
         this.setState({visible:true})

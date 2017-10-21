@@ -14,7 +14,15 @@ export default class SchoolBus extends Component {
           page: 'first',
           visible : false,
           editInfo : false,
-          attorneys : []
+          attorney : {
+            name : "", 
+            last_name : "", 
+            county : "", 
+            street : "", 
+            street_number : "", 
+            children: [], 
+            number_children: 0
+          }
         };
     }
     showPop(){
@@ -45,12 +53,69 @@ export default class SchoolBus extends Component {
     }
 
     editToggle(){
+        console.log(this.state.attorney)
         let edit = this.state.editInfo;
         if(edit){
             this.setState({editInfo:false})
         }
         else{
             this.setState({editInfo:true})
+            var user = firebaseRef.auth().currentUser;
+            sha256(user.email)
+            .then( hash => {
+                firebaseRef.database().ref('Attorney/' + hash+ '/personal_info').update({
+                    name: this.state.attorney.name,
+                    last_name: this.state.attorney.last_name,
+                    street: this.state.attorney.street,
+                    street_number: this.state.attorney.street_number,
+                    county: this.state.attorney.county
+                });
+            })
+
+        }
+    }
+    componentDidMount(){
+        var userId = firebaseRef.auth().currentUser.uid;
+        sha256(userId).then( hash => {
+            let search = "Attorney/"+hash
+            var ref = firebaseRef.database().ref(search);
+            console.log(ref)
+            ref.once("value")
+                .then((snapshot) => {
+                    console.log(snapshot.child("children").numChildren())
+                    alert(snapshot.child("children").val()); 
+                    let temp_atorney = this.state.attorney
+                    temp_atorney = { 
+                        name : snapshot.child("name").val(), 
+                        last_name : snapshot.child("last_name").val(), 
+                        county : snapshot.child("county").val(), 
+                        street : snapshot.child("street").val(), 
+                        street_number : snapshot.child("street_number").val(), 
+                        children: snapshot.child("children").val() , 
+                        number_children: snapshot.child("children").numChildren() 
+                    }
+                    this.setState({attorney : temp_atorney })
+            });
+              
+        })
+    }
+    handleChange(value,key){
+        console.log(value)
+        console.log(key)
+        if (key == "name"){
+            this.setState({attorney: {...this.state.attorney, name : value } });
+        }
+        if (key == "last_name"){
+            this.setState({attorney: {...this.state.attorney, last_name : value } });
+        }
+        if (key == "county"){
+            this.setState({attorney: {...this.state.attorney, county : value } });
+        }
+        if (key == "street"){
+            this.setState({attorney: {...this.state.attorney, street : value } });
+        }
+        if (key == "street_number"){
+            this.setState({attorney: {...this.state.attorney, street_number : value } });
         }
     }
     render() {
@@ -61,23 +126,25 @@ export default class SchoolBus extends Component {
         // if (Platform.OS === 'android') tabbarStyles.push(styles.androidTabbar);
         
         return (
-          <View style={styles.container}>
+          <View style={styles.container}>           
             <ScrollView>
                 <List style={styles.list} renderHeader={() => 'Su información personal'}>
                     <InputItem
                         type = "text"                    
-                        disabled = {this.state.editInfo}
+                        editable = {this.state.editInfo}
                         placeholder = "Nombre"
-                        defaultValue = "nombre "
-                        onChange = {(value) => console.log(value)}
+                        defaultValue ={this.state.attorney.name}
+                        onChange = {(value) => this.handleChange(value,"name")}
+                        key = "name"
                     >
                     Nombre:
                     </InputItem>
                     <InputItem
                         type = "text"                    
-                        disabled = {this.state.editInfo}
+                        editable = {this.state.editInfo}
                         placeholder = "Apellido"
-                        defaultValue = "apellido "
+                        defaultValue = {this.state.attorney.last_name}
+                        onChange = {(value) => this.handleChange(value,"last_name")}
                     >
                     Apellido:
                     </InputItem>
@@ -98,17 +165,19 @@ export default class SchoolBus extends Component {
                 </List.Item>
                     <InputItem
                         type = "text"                    
-                        disabled = {this.state.editInfo}
+                        editable = {this.state.editInfo}
                         placeholder = "Calle/pasaje"
                         defaultValue = ""
+                        onChange = {(value) => this.handleChange(value,"street")}
                     >
                     Calle/pasaje:
                     </InputItem>
                     <InputItem
                         type = "number"                    
-                        disabled = {this.state.editInfo}
+                        editable = {this.state.editInfo}
                         placeholder = "Número"
                         defaultValue = ""
+                        onChange = {(value) => this.handleChange(value,"street_number")}
                     >
                     Número:
                     </InputItem>
