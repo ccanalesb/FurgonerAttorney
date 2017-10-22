@@ -14,7 +14,10 @@ export default class SchoolBus extends Component {
         this.state = {
           page: 'first',
           visible : false,
-          attorneys : []
+          school_bus : {
+              name: "",
+              in_transit: false
+          }
         };
     }
     showPop(){
@@ -22,19 +25,59 @@ export default class SchoolBus extends Component {
     }
     searchEmail(value){
       this.setState({visible: true})
+      var user = firebaseRef.auth().currentUser;
+      sha256(user.email)
+      .then( hash => {
+          firebaseRef.database().ref('Attorney/' + hash+'/school_bus').once("value")
+          .then((snapshot)=>{
+              if (snapshot.val() === null){
+                firebaseRef.database().ref('Attorney/' + hash).update({
+                    school_bus: value
+                });
+              }
+
+          })
+      })
+
       sha256(value).then( hash => {
         let search = "School_bus/"+hash
         var ref = firebaseRef.database().ref(search);
-        console.log(ref)
         ref.once("value")
-            .then((snapshot) => {
-                alert(`El nombre de la persona es " ${snapshot.child("name").val()}"`)
-                console.log(snapshot.child("children").numChildren())
-                console.log(snapshot.child("children").val()); 
-                let temp_atorney = this.state.attorneys
-                temp_atorney.push({ name : snapshot.child("name").val(), children: snapshot.child("children").val() , number_children: snapshot.child("children").numChildren() })
-                this.setState({attorneys : temp_atorney })
-        });
+        .then((snapshot) => {
+                let in_transit = snapshot.child("in_transit").val();
+                let attorneys = snapshot.child("attorneys").val();
+                var user = firebaseRef.auth().currentUser;
+                sha256(user.email)
+                .then( user_hash => {
+                    console.log("probando")
+                    if (typeof attorneys[user_hash] === "undefined"){
+                        alert(`Se envió una notificación a ${snapshot.child("name").val()}`)
+                        firebaseRef.database().ref(search+'/attorneys/'+ user_hash).update({
+                            state: "pending"
+                        })
+                    }
+                    else{
+                        if(attorneys[user_hash].state == "pending"){
+                            alert("Tu solicitud se encuentra pendiente, el encargado del furgón debe aceptarla")
+                        }
+                        else{
+                            console.log(snapshot.child("children").numChildren())
+                            console.log(snapshot.child("children").val()); 
+                            let temp_atorney = this.state.school_bus
+                            temp_atorney = { name : snapshot.child("name").val(), in_transit: in_transit }
+                            this.setState({school_bus : temp_atorney })
+                        }
+                    }
+
+                })
+
+        })
+        .catch((error) => {
+            // Handle Errors here.
+            console.log(error.code)
+            console.log(error.message)
+            alert(JSON.stringify(error.message))
+        })
           
       })
       this.setState({
@@ -43,7 +86,55 @@ export default class SchoolBus extends Component {
         visible: false
       }) 
     }
+    componentDidMount(){
+        var user = firebaseRef.auth().currentUser;
+        sha256(user.email).then( user_hash => {
+            firebaseRef.database().ref('Attorney/' + user_hash+'/school_bus').once("value")
+            .then((snapshot) => {
+                if (snapshot.val() != null){
+                    sha256(snapshot.val())
+                    .then( hash => {
+                        let search = "School_bus/"+hash
+                        var ref = firebaseRef.database().ref(search);
+                        ref.once("value")
+                        .then((snapshot) => {
+                                let in_transit = snapshot.child("in_transit").val();
+                                let attorneys = snapshot.child("attorneys").val();
+                                var user = firebaseRef.auth().currentUser;
+                                sha256(user.email)
+                                .then( user_hash => {
+                                    if(attorneys[user_hash].state == "pending"){
+                                        alert("Tu solicitud se encuentra pendiente, el encargado del furgón debe aceptarla")
+                                    }
+                                    else{
+                                        console.log(snapshot.child("children").numChildren())
+                                        console.log(snapshot.child("children").val()); 
+                                        let temp_atorney = this.state.school_bus
+                                        temp_atorney = { name : snapshot.child("name").val(), in_transit: in_transit }
+                                        this.setState({school_bus : temp_atorney })
+                                    }
+                
+                                })
+                
+                        })
+                    .catch((error) => {
+                        // Handle Errors here.
+                        console.log(error.code)
+                        console.log(error.message)
+                        alert(JSON.stringify(error.message))
+                    })
+                    })
 
+                }
+            })
+            .catch((error) => {
+                // Handle Errors here.
+                console.log(error.code)
+                console.log(error.message)
+                alert(JSON.stringify(error.message))
+            })
+        })
+    }
     render() {
 
         const { page } = this.state;
@@ -53,26 +144,25 @@ export default class SchoolBus extends Component {
         return (
           <View style={styles.container}>
             <ScrollView>
-                <List style={styles.list}>
-                { this.state.attorneys.map((e, i) =>
-                            <AttorneysCard key={i} attorney = {e}/>
-                        )}
-                </List>
-                
+                {/* <List style={styles.list}> */}
+                {(this.state.school_bus.name === "") ? null:
+                    <SchoolBusCard school_bus = {this.state.school_bus}/>
+                }
+                {/* </List> */}
             </ScrollView>
             <View style={styles.form}>
                         <View style={styles.formContainer}>
                             <TouchableOpacity style={styles.buttonContainer} onPress={()=> this.setState({promptVisible:true})}>
                                 <Text style={styles.buttonText}> 
-                                    Agregar apoderado
+                                    Agregar furgón
                                 </Text>
                             </TouchableOpacity>
                         </View>
                 </View>
             <Prompt
-              title="Ingrese correo del apoderado"
+              title="Ingrese correo del furgón"
               placeholder="example@mail.com"
-              defaultValue="test@mail.cl"
+              defaultValue="canaleschiko@gmail.com"
               visible={ this.state.promptVisible }
               onCancel={ () => this.setState({
                 promptVisible: false,

@@ -6,18 +6,20 @@ export default class SchoolBusCard extends Component {
     render(){
         console.log(this.props)
         return(
-            <List.Item>
-            <Card>
+            // <List.Item>
+            <Card full>
             <Card.Header
-              title={this.props.attorney.name}
-              extra={`Hijos ${this.props.attorney.number_children}`}
+              title={this.props.school_bus.name}
+              extra={`Patente ${this.props.school_bus.number_children}`}
             />
             <Card.Body>
-              <Text style={ {textAlign: 'justify'}}>comuna: </Text>
+              <View>
+                <Text style={ {textAlign: 'justify'}}> En transito: {this.props.school_bus.in_transit ? "Si": "No"} </Text>
+              </View>
             </Card.Body>
-            <Card.Footer content="Se recoje en la vuelta:" />
+            <Card.Footer content="Tus hijos se recojen en la vuelta:" />
           </Card>
-          </List.Item>
+          // </List.Item>
         )
     }
 

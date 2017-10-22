@@ -28,29 +28,6 @@ export default class SchoolBus extends Component {
     showPop(){
       console.log(this.state)
     }
-    searchEmail(value){
-      this.setState({visible: true})
-      sha256(value).then( hash => {
-        let search = "School_bus/"+hash
-        var ref = firebaseRef.database().ref(search);
-        console.log(ref)
-        ref.once("value")
-            .then((snapshot) => {
-                alert(`El nombre de la persona es " ${snapshot.child("name").val()}"`)
-                console.log(snapshot.child("children").numChildren())
-                console.log(snapshot.child("children").val()); 
-                let temp_atorney = this.state.attorneys
-                temp_atorney.push({ name : snapshot.child("name").val(), children: snapshot.child("children").val() , number_children: snapshot.child("children").numChildren() })
-                this.setState({attorneys : temp_atorney })
-        });
-          
-      })
-      this.setState({
-        promptVisible: false,
-        message: `You said "${value}"`,
-        visible: false
-      }) 
-    }
 
     editToggle(){
         console.log(this.state.attorney)
@@ -75,15 +52,15 @@ export default class SchoolBus extends Component {
         }
     }
     componentDidMount(){
-        var userId = firebaseRef.auth().currentUser.uid;
-        sha256(userId).then( hash => {
-            let search = "Attorney/"+hash
+        var user = firebaseRef.auth().currentUser;
+        sha256(user.email).then( hash => {
+            let search = "Attorney/"+hash+"/personal_info"
             var ref = firebaseRef.database().ref(search);
+            console.log(search)
             console.log(ref)
             ref.once("value")
                 .then((snapshot) => {
-                    console.log(snapshot.child("children").numChildren())
-                    alert(snapshot.child("children").val()); 
+                    console.log(snapshot.child("children").numChildren()) 
                     let temp_atorney = this.state.attorney
                     temp_atorney = { 
                         name : snapshot.child("name").val(), 
@@ -167,7 +144,7 @@ export default class SchoolBus extends Component {
                         type = "text"                    
                         editable = {this.state.editInfo}
                         placeholder = "Calle/pasaje"
-                        defaultValue = ""
+                        defaultValue = {this.state.attorney.street}
                         onChange = {(value) => this.handleChange(value,"street")}
                     >
                     Calle/pasaje:
@@ -176,7 +153,7 @@ export default class SchoolBus extends Component {
                         type = "number"                    
                         editable = {this.state.editInfo}
                         placeholder = "Número"
-                        defaultValue = ""
+                        defaultValue = {this.state.attorney.street_number}
                         onChange = {(value) => this.handleChange(value,"street_number")}
                     >
                     Número:
