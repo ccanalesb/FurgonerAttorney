@@ -12,7 +12,7 @@ import { Actions } from 'react-native-router-flux';
 import { firebaseRef } from '../services/firebase.js'
 
 import uuid from 'react-native-uuid';
-
+import { sha256 } from 'react-native-sha256';
 
 
 const LATITUD_DELTA = 0.0922
@@ -40,14 +40,46 @@ export default class ShowMap extends Component {
                 latitude : 0,
                 longitude : 0
             },
+            school_busPosition: {
+                latitude : 0,
+                longitude : 0
+            },
             follow_marker : true,
             user : null
         };
     }
     watchID : ?number = null
-
-    componentDidMount () {
-        alert(uuid.v4())
+    checkSchoolBus() {
+        var user = firebaseRef.auth().currentUser;
+        sha256(user.email).then( user_hash => {
+            firebaseRef.database().ref('Attorney/' + user_hash+'/school_bus').once("value")
+            .then((snapshot) => {
+                let school_bus = snapshot.val()
+                if (school_bus != null){
+                    sha256(school_bus)
+                    .then( school_bus_hash=> {
+                        let search = "School_bus/"+school_bus_hash
+                        var ref = firebaseRef.database().ref(search);
+                        ref.on("value")
+                        .then((snapshot) => {
+                            if(snapshot.child("in_transit").val()){
+                                this.setState({
+                                    school_busPosition: {
+                                        ...this.state.school_busPosition,
+                                        latitude : ( (snapshot.child("latitude").val() != null) ? snapshot.child("latitude").val() : 0 ),
+                                        longitude : ( (snapshot.child("longitude").val() != null) ? snapshot.child("longitude").val() : 0 ),
+                                    }
+                                })
+                            }
+                        })
+                    })
+                }
+            })
+        })
+    }
+    componentDidMount() {
+        this.checkSchoolBus()
+        // alert(uuid.v4())
         console.log(this.state)
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -79,11 +111,11 @@ export default class ShowMap extends Component {
                 var lat = parseFloat(position.coords.latitude)
                 var long = parseFloat(position.coords.longitude)
                 if(this.state.user != null){
-                    let timerID = setTimeout(() => {firebaseRef.database().ref('School_bus/' + this.state.user.uid).update({
-                        latitude: lat,
-                        longitude: long,
-                    })},4000)
-                    clearInterval(timerID)
+                    // let timerID = setTimeout(() => {firebaseRef.database().ref('School_bus/' + this.state.user.uid).update({
+                    //     latitude: lat,
+                    //     longitude: long,
+                    // })},4000)
+                    // clearInterval(timerID)
                 }
                 // const { latitudeDelta, longitudeDelta} = getRegionForCoordinates({ latitude: lat, longitude: long })
                 // console.log(latitudeDelta)
@@ -143,6 +175,7 @@ export default class ShowMap extends Component {
     }
     touchMarker(e){
         console.log("tocando el marcado")
+        console.log(this.state)
         console.log(e.nativeEvent)
     }
     moveMarker(e){
@@ -205,6 +238,8 @@ export default class ShowMap extends Component {
 
                 <MapView.Marker
                 coordinate = {this.state.markerPosition}
+                title = "Mi posición"
+                description = "Una pequeña descripción"
                 draggable
                 onDragEnd={this.moveMarker.bind(this)}
                 onPress = {this.touchMarker.bind(this)}
@@ -215,6 +250,16 @@ export default class ShowMap extends Component {
                         </View>    
                     </View>    
                 </MapView.Marker>
+
+                <MapView.Marker
+                coordinate = {this.state.school_busPosition}
+                >
+                    <View style={styles.radius2}>
+                        <View style = {styles.marker2}>  
+                        </View>    
+                    </View>    
+                </MapView.Marker>
+
                 </MapView>
                 <TouchableOpacity style={styles.buttonContainer} onPress = {this.handlePress.bind(this)}>
                     <Text style={styles.buttonText}>
@@ -247,6 +292,26 @@ const styles = StyleSheet.create({
         borderRadius: 20/2,
         overflow: 'hidden',
         backgroundColor: '#007AFF'
+    },
+    marker2 : {
+        height: 20,
+        width: 20,
+        borderWidth: 3,
+        borderColor: 'white',
+        borderRadius: 20/2,
+        overflow: 'hidden',
+        backgroundColor: '#ff8500'
+    },
+    radius2: {
+        height: 30,
+        width: 30,
+        borderRadius: 30/2,
+        overflow: 'hidden',
+        backgroundColor: 'rgba(0,122,255,0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(0,122,255,0.3)',
+        alignItems: 'center',
+        justifyContent : 'center'
     },
     container: {
       ...StyleSheet.absoluteFillObject,
