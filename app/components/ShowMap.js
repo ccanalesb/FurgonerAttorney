@@ -58,20 +58,31 @@ export default class ShowMap extends Component {
                 if (school_bus != null){
                     sha256(school_bus)
                     .then( school_bus_hash=> {
-                        let search = "School_bus/"+school_bus_hash
-                        var ref = firebaseRef.database().ref(search);
-                        ref.on("value")
-                        .then((snapshot) => {
-                            if(snapshot.child("in_transit").val()){
-                                this.setState({
-                                    school_busPosition: {
-                                        ...this.state.school_busPosition,
-                                        latitude : ( (snapshot.child("latitude").val() != null) ? snapshot.child("latitude").val() : 0 ),
-                                        longitude : ( (snapshot.child("longitude").val() != null) ? snapshot.child("longitude").val() : 0 ),
+                        let status_search = "School_bus/"+school_bus_hash+"/attorneys/"+user_hash
+                        var attorney_ref = firebaseRef.database().ref(status_search);
+                        attorney_ref.once("value")
+                        .then((attorney_snapshot)=>{
+                            if(attorney_snapshot.val().state=="ready"){
+                                let search = "School_bus/"+school_bus_hash
+                                var ref = firebaseRef.database().ref(search);
+                                ref.once("value")
+                                .then((snapshot) => {
+                                    if(snapshot.child("in_transit").val()){
+                                        this.setState({
+                                            school_busPosition: {
+                                                ...this.state.school_busPosition,
+                                                latitude : ( (snapshot.child("latitude").val() != null) ? snapshot.child("latitude").val() : 0 ),
+                                                longitude : ( (snapshot.child("longitude").val() != null) ? snapshot.child("longitude").val() : 0 ),
+                                            }
+                                        })
                                     }
                                 })
                             }
+                            else{
+                                alert("Su furgón está correctamente agregado, pero el encargado aún no lo autoriza")
+                            }
                         })
+
                     })
                 }
             })
