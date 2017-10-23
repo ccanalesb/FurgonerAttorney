@@ -49,6 +49,7 @@ export default class ShowMap extends Component {
         };
     }
     watchID : ?number = null
+    
     checkSchoolBus() {
         var user = firebaseRef.auth().currentUser;
         sha256(user.email).then( user_hash => {

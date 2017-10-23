@@ -12,8 +12,28 @@ import DrawerContent from './components/drawer/DrawerContent';
 import ShowMap  from './components/ShowMap'
 import SchoolBus  from './components/SchoolBus'
 import PersonalInfo  from './components/PersonalInfo'
+import { firebaseRef } from './services/firebase.js'
 console.disableYellowBox = true
+
 export default class FurgonerAttorney extends Component {
+      componentDidMount(){
+        console.log("revisando si tenía sesión")
+        this.setState({visible:true})
+        firebaseRef.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log("ya estaba conectado")
+                console.log(user.displayName)
+                console.log(user.email)
+                Actions.main()
+                this.setState({visible:false, login:true})
+              // User is signed in.
+            } else {
+                console.log("no estaba conectado")
+                this.setState({visible:false, login:false})
+              // No user is signed in.
+            }
+        });
+    }
     render(){
         return (
             <Router navigationBarStyle={styles.navBar} titleStyle={styles.navBarTitle}>
