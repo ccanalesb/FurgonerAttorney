@@ -13,6 +13,8 @@ import ShowMap  from './components/ShowMap'
 import SchoolBus  from './components/SchoolBus'
 import PersonalInfo  from './components/PersonalInfo'
 import { firebaseRef } from './services/firebase.js'
+import NotificationView from './components/notifications/NotificationView'
+
 console.disableYellowBox = true
 
 export default class FurgonerAttorney extends Component {
@@ -75,6 +77,12 @@ export default class FurgonerAttorney extends Component {
                      title="Información personal"
                      initial
                    />
+                   <Scene
+                 key="notification"
+                 component={NotificationView}
+                 title="Notifficacioens"
+               />
+ 
                  </Drawer>  
                </Scene>
              </Stack>

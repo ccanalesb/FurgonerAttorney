@@ -3,6 +3,7 @@ package com.furgonerattorney;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.sha256lib.Sha256Package;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.facebook.react.ReactNativeHost;
@@ -25,6 +26,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ReactNativePushNotificationPackage(),
             new Sha256Package(),
             new MapsPackage()
       );
