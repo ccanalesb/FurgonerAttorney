@@ -12,6 +12,7 @@ import {
 import { Actions } from 'react-native-router-flux';
 import { firebaseRef } from '../../services/firebase.js'
 import Spinner from 'react-native-loading-spinner-overlay';
+import { sha256 } from 'react-native-sha256';
 export default class LoginWrapper extends Component {
     constructor(props){
         super(props)
@@ -63,6 +64,7 @@ export default class LoginWrapper extends Component {
         this.setState({visible:true})
         firebaseRef.auth().onAuthStateChanged((user) => {
             if (user) {
+                console.log(user)
                 console.log("ya estaba conectado")
                 console.log(user.displayName)
                 console.log(user.email)

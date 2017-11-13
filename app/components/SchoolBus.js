@@ -27,7 +27,7 @@ export default class SchoolBus extends Component {
       this.setState({visible: true})
       var user = firebaseRef.auth().currentUser;
       sha256(user.email)
-      .then( hash => {
+      .then( (hash) => {
           firebaseRef.database().ref('Attorney/' + hash+'/school_bus').once("value")
           .then((snapshot)=>{
               if (snapshot.val() === null){
@@ -42,6 +42,18 @@ export default class SchoolBus extends Component {
       sha256(value).then( hash => {
         let search = "School_bus/"+hash
         var ref = firebaseRef.database().ref(search);
+        var user = firebaseRef.auth().currentUser;
+        user.updateProfile({
+            photoURL: hash
+        })
+        .then((user) => {
+            console.log("Update user school bus with hash")
+            console.log(firebaseRef.auth().currentUser)
+        })
+        .catch(function (error) {
+            console.log(error)
+        });
+
         ref.once("value")
         .then((snapshot) => {
                 let in_transit = snapshot.child("in_transit").val();

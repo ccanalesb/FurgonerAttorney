@@ -35,16 +35,25 @@ export default class NewAccount extends Component {
             .then((result) => {
                 firebaseRef.auth().onAuthStateChanged((user) => {
                     // User is signed in.
-                    if (user) {
-                        var user_uid = user.uid
-                        var user_email = user.email
-                        sha256(user_email).then( hash => {
+                    if (user) {                        
+                        sha256(user.email).then( hash => {
                             console.log(user_email)
                             firebaseRef.database().ref('Attorney/' + hash).set({
                                 uid: user_uid
                             });
                             firebaseRef.database().ref('User/' + user_uid).set({
                                 type: "attorney"
+                            });
+                            let user = firebaseRef.auth().currentUser;
+                            user.updateProfile({
+                                displayName: hash
+                            })
+                            .then((user) => {
+                                console.log("Update user with hash")
+                                console.log(firebaseRef.auth().currentUser)
+                            })
+                            .catch(function (error) {
+                                console.log(error)
                             });
                             Actions.main()
                             this.setState({visible:false})
@@ -60,10 +69,11 @@ export default class NewAccount extends Component {
             })
             .catch((error) => {
                 // Handle Errors here.
+                this.setState({ visible: false })
                 console.log(error.code)
                 console.log(error.message)
                 alert(JSON.stringify(error.message))
-                this.setState({visible:false})
+                
             })
         }
         else {

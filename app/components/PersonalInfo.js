@@ -18,7 +18,7 @@ export default class SchoolBus extends Component {
             name : "", 
             last_name : "", 
             county : "", 
-            street : "", 
+            street: "", 
             street_number : "", 
             children: [], 
             number_children: 0
@@ -28,14 +28,30 @@ export default class SchoolBus extends Component {
     showPop(){
       console.log(this.state)
     }
-
-    editToggle(){
+    async getLatitudeandLongitude() {
+        try {
+            let street = this.state.attorney.street
+            if(street != ""){
+                console.log("no estoy vacío")
+                street.replace(" ", "+")
+            }
+            let response = await fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + this.state.attorney.street_number + '+' + this.state.attorney.street + '&key=AIzaSyARV6XwdjIT_xO7vsZkCiMrlSgWCc21QDM');
+            let responseJson = await response.json();
+            console.log(responseJson.results[0].geometry.location)
+            return responseJson.results[0].geometry.location;
+        } catch (error) {
+            console.error(error);
+        }
+    } 
+    async editToggle(){
         console.log(this.state.attorney)
         let edit = this.state.editInfo;
         if(edit){
             this.setState({editInfo:false})
         }
         else{
+            
+            let coordinates = await this.getLatitudeandLongitude()
             this.setState({editInfo:true})
             var user = firebaseRef.auth().currentUser;
             sha256(user.email)
@@ -45,7 +61,20 @@ export default class SchoolBus extends Component {
                     last_name: this.state.attorney.last_name,
                     street: this.state.attorney.street,
                     street_number: this.state.attorney.street_number,
-                    county: this.state.attorney.county
+                    county: this.state.attorney.county,
+                    latitude: coordinates.lat,
+                    longitude: coordinates.lng
+                });
+                let user = firebaseRef.auth().currentUser;
+                user.updateProfile({
+                    displayName: hash
+                })
+                .then((user)=>{
+                    console.log("Update user with hash")
+                    console.log(firebaseRef.auth().currentUser)
+                })
+                .catch(function (error) {
+                    console.log(error)
                 });
             })
 
