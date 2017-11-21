@@ -16,7 +16,6 @@ import { sha256 } from 'react-native-sha256';
 
 
 const LATITUD_DELTA = 0.0922
-
 const LONGITUDE_DELTA = 0.0421
 
 export default class ShowMap extends Component {
@@ -52,7 +51,7 @@ export default class ShowMap extends Component {
             user : null
         };
     }
-    watchID : ?number = null
+    // watchID : ?number = null
     
     checkSchoolBus() {
         var user = firebaseRef.auth().currentUser;
@@ -104,8 +103,6 @@ export default class ShowMap extends Component {
         var user = firebaseRef.auth().currentUser;
         let search = "Attorney/" + user.displayName + "/personal_info"
         var ref = firebaseRef.database().ref(search);
-        console.log(search)
-        console.log(ref)
         ref.once("value")
             .then((snapshot) => {
                 this.setState({
@@ -120,75 +117,6 @@ export default class ShowMap extends Component {
     componentDidMount() {
         this.checkHouseMarker()
         this.checkSchoolBus()
-        // alert(uuid.v4())
-        console.log(this.state)
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                var lat = parseFloat(position.coords.latitude)
-                var long = parseFloat(position.coords.longitude)
-                const window = Dimensions.get('window');
-                const { width, height }  = window
-                LONGITUDE_DELTA = LATITUD_DELTA + (width / height)
-
-                let initialRegion = {
-                    latitude : lat,
-                    longitude : long,
-                    latitudeDelta: LATITUD_DELTA/30,
-                    longitudeDelta : LONGITUDE_DELTA/30
-                }
-                this.setState({
-                    position: initialRegion,
-                    regionPosition : initialRegion,
-                    markerPosition : { latitude: lat, longitude: long}
-                })
-                console.log("Get current position")
-
-            }, (error) => alert(JSON.stringify(error)),
-            { enableHighAccuracy: true, timeout: 20000, maximumAge : 100 })
-
-            this.watchID = navigator.geolocation.watchPosition((position)=>{
-
-                console.log("Watching position")
-                var lat = parseFloat(position.coords.latitude)
-                var long = parseFloat(position.coords.longitude)
-                if(this.state.user != null){
-                    // let timerID = setTimeout(() => {firebaseRef.database().ref('School_bus/' + this.state.user.uid).update({
-                    //     latitude: lat,
-                    //     longitude: long,
-                    // })},4000)
-                    // clearInterval(timerID)
-                }
-                // const { latitudeDelta, longitudeDelta} = getRegionForCoordinates({ latitude: lat, longitude: long })
-                // console.log(latitudeDelta)
-                // console.log(longitudeDelta)
-
-                let lastPosition = {
-                    latitude : lat,
-                    longitude : long,
-                    latitudeDelta: LATITUD_DELTA,
-                    longitudeDelta : LONGITUDE_DELTA
-                }
-                if(this.state.follow_marker){
-                    console.log("Following marker")
-                    this.setState({
-                        position: {
-                            latitude : lat,
-                            longitude : long,
-                            latitudeDelta: this.state.position.latitudeDelta,
-                            longitudeDelta : this.state.position.longitudeDelta
-                        },  
-                        markerPosition : { latitude: lat, longitude: long}})
-                }
-                else {
-                    console.log("Free move")
-                    this.setState({
-                        markerPosition : { latitude: lat, longitude: long}
-                    })
-                }
-
-            }, (error) => alert(JSON.stringify(error)),
-            { enableHighAccuracy: true, timeout: 20000, maximumAge : 100 })
-        
     }
     distance(lat1, lon1, lat2, lon2) {
         console.log("calculando distancia")
@@ -201,28 +129,36 @@ export default class ShowMap extends Component {
         return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
     }
     onRegionChange(region){
-        if(this.state.follow_marker){
-            this.setState({
-                position: {
-                    ...this.state.position,
-                    latitudeDelta : region.latitudeDelta,
-                    longitudeDelta : region.longitudeDelta
-                }
-            })
-        }
-        else{
-            this.setState({
-                regionPosition: {
-                    latitude : region.latitude,
-                    longitude : region.longitude,
-                    latitudeDelta : region.latitudeDelta,
-                    longitudeDelta : region.longitudeDelta
-                }
-            })
-        }
+        this.setState({
+            regionPosition: {
+                latitude: region.latitude,
+                longitude: region.longitude,
+                latitudeDelta: region.latitudeDelta,
+                longitudeDelta: region.longitudeDelta
+            }
+        })
+        // if(this.state.follow_marker){
+        //     this.setState({
+        //         position: {
+        //             ...this.state.position,
+        //             latitudeDelta : region.latitudeDelta,
+        //             longitudeDelta : region.longitudeDelta
+        //         }
+        //     })
+        // }
+        // else{
+        //     this.setState({
+        //         regionPosition: {
+        //             latitude : region.latitude,
+        //             longitude : region.longitude,
+        //             latitudeDelta : region.latitudeDelta,
+        //             longitudeDelta : region.longitudeDelta
+        //         }
+        //     })
+        // }
     }
     componentWillUnmount() {
-        navigator.geolocation.clearWatch(this.watchID)
+        // navigator.geolocation.clearWatch(this.watchID)
         var user = firebaseRef.auth().currentUser;
         sha256(user.email).then(user_hash => {
             firebaseRef.database().ref('Attorney/' + user_hash + '/school_bus').once("value")
@@ -297,43 +233,31 @@ export default class ShowMap extends Component {
             <View style = {styles.container} >
                 <MapView
                     style = {styles.map}
-                    region={mapRegion}
+                    region={this.state.house_position}
                     onRegionChangeComplete={this.onRegionChange.bind(this)}
                     ref={(ref) => { this.mapRef = ref }}
                 >
-
-                <MapView.Marker
-                coordinate = {this.state.markerPosition}
-                title = "Mi posición"
-                description = "Una pequeña descripción"
-                draggable
-                onDragEnd={this.moveMarker.bind(this)}
-                onPress = {this.touchMarker.bind(this)}
-                >
-    
-                    <View style={styles.radius}>
-                        <View style = {styles.marker}>  
+                    <MapView.Marker
+                        coordinate = {this.state.school_busPosition}
+                        title="Mi Furgón"
+                        description="Posición del furgón"
+                    >
+                        <View style={styles.radius2}>
+                            <View style = {styles.marker2}>  
+                            </View>    
                         </View>    
-                    </View>    
-                </MapView.Marker>
+                    </MapView.Marker>
 
-                <MapView.Marker
-                coordinate = {this.state.school_busPosition}
-                >
-                    <View style={styles.radius2}>
-                        <View style = {styles.marker2}>  
-                        </View>    
-                    </View>    
-                </MapView.Marker>
-
-                <MapView.Marker
-                    coordinate={this.state.house_position}
-                >
-                    <View style={styles.radius3}>
-                        <View style={styles.marker3}>
+                    <MapView.Marker
+                        coordinate={this.state.house_position}
+                        title="Mi Casa"
+                        description="esta es mi casita"
+                    >
+                        <View style={styles.radius3}>
+                            <View style={styles.marker3}>
+                            </View>
                         </View>
-                    </View>
-                </MapView.Marker>
+                    </MapView.Marker>
 
                 </MapView>
                 <TouchableOpacity style={styles.buttonContainer} onPress = {this.handlePress.bind(this)}>

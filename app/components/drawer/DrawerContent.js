@@ -82,14 +82,14 @@ class DrawerContent extends React.Component {
               Furgón
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.listItem} onPress={() => Actions.notification()}>
+          {/* <TouchableOpacity style={styles.listItem} onPress={() => Actions.notification()}>
             <Text
               
               style= {styles.listItemTitle}
             >
               Notificaciones
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity style={styles.listItem} onPress={() =>  Actions.personalinfo()}>
             <Text
               
