@@ -20,8 +20,10 @@
     "react-native-push-notification": "^3.0.1",
     "react-native-router-flux": "^4.0.0-beta.21",
     "react-native-sha256": "^1.1.1",
+    "react-native-svg": "^5.4.1",
     "react-native-uuid": "^1.4.9",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "victory-native": "^0.16.1"
   },
   "devDependencies": {
     "babel-jest": "21.2.0",

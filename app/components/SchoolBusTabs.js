@@ -5,7 +5,7 @@ import SchoolBus from './SchoolBus'
 import SchoolBusChart from './SchoolBusChart'
 
 const AttorneyRoute = () => <SchoolBus />
-const SecondRoute = () => <SchoolBus />
+const SecondRoute = () => <SchoolBusChart />
 
 export default class AttorneysTabs extends Component {
     constructor(props) {

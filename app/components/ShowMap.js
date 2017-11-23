@@ -45,7 +45,9 @@ export default class ShowMap extends Component {
             },
             house_position:{
                 latitude : 0,
-                longitude: 0
+                longitude: 0,
+                latitudeDelta: LATITUD_DELTA,
+                longitudeDelta: LONGITUDE_DELTA
             },
             follow_marker : true,
             user : null
@@ -260,11 +262,11 @@ export default class ShowMap extends Component {
                     </MapView.Marker>
 
                 </MapView>
-                <TouchableOpacity style={styles.buttonContainer} onPress = {this.handlePress.bind(this)}>
+                {/* <TouchableOpacity style={styles.buttonContainer} onPress = {this.handlePress.bind(this)}>
                     <Text style={styles.buttonText}>
                         Iniciar Viaje
                     </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         )
     }
