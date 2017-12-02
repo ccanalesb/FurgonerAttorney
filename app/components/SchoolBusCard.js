@@ -9,15 +9,15 @@ export default class SchoolBusCard extends Component {
             // <List.Item>
             <Card full>
             <Card.Header
-              title={this.props.school_bus.name}
-              extra={`Patente ${this.props.school_bus.number_children}`}
+              title={"Nombre: " + this.props.school_bus.name }
+              extra={`Patente ${this.props.school_bus.patent}`}
             />
             <Card.Body>
-              <View>
-                <Text style={ {textAlign: 'justify'}}> En transito: {this.props.school_bus.in_transit ? "Si": "No"} </Text>
-              </View>
+              <Text style={{ textAlign: 'justify', marginLeft: 15, fontSize:20 }}>
+                ¿En transito? : {this.props.school_bus.in_transit ? "Si" : "No"}
+              </Text>
             </Card.Body>
-            <Card.Footer content="Tus hijos se recojen en la vuelta:" />
+            <Card.Footer content="" />
           </Card>
           // </List.Item>
         )

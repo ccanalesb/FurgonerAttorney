@@ -8,7 +8,8 @@ import { VictoryChart,
     VictoryLine, 
     VictoryZoomContainer, 
     VictoryBrushContainer,
-    VictoryGroup } from "victory-native";
+    VictoryGroup,
+    VictoryScatter } from "victory-native";
 
 
 export default class SchoolBus extends Component {
@@ -19,13 +20,16 @@ export default class SchoolBus extends Component {
             page: 'first',
             x_data: [],
             y_data: [],
-            z_data: []
+            z_data: [],
+            tickValues: [],
+            min: 0,
+            max: 0
         };
     }
     formatTime(time_to_show){
         var t = new Date(time_to_show * 1000);
         var formatted = ('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2);
-        return formatted
+        return t
     }
     componentWillMount(){
         console.log("Montando componente")
@@ -39,6 +43,9 @@ export default class SchoolBus extends Component {
         firebaseRef.database().ref('School_bus/' + user.photoURL + '/stadistic/this_week/'+day).once("value")
             .then((snapshot) => {
                 snapshot.val().map((e,i) =>{
+                    if(i == 0){
+                        this.setState({ min: this.formatTime(e["timestamp"]) })
+                    }
                     temp_x_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["X"])})
                     temp_y_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["Y"])})
                     temp_z_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["Z"])})
@@ -46,11 +53,22 @@ export default class SchoolBus extends Component {
                 )
             })
             .then(()=>{
+                console.log(temp_x_data[temp_x_data.length-1]["x"])
+                how_many = parseInt(temp_x_data.length / 6)
+                tickValues = []
+                for (let index = 0; index < temp_x_data.length; index++) {
+                    
+                    tickValues.push(temp_x_data[index]["x"])
+                    index += how_many
+                }
                 this.setState({
                     x_data: temp_x_data,
                     y_data: temp_y_data,
-                    z_data: temp_z_data
+                    z_data: temp_z_data,
+                    max: temp_x_data[temp_x_data.length-1]["x"],
+                    tickValues: tickValues
                 })
+                console.log(this.state)
             })
         // this.state.attorneys.map((e, i) =>
         //     <AttorneysCard key={i} attorney={e} type={this.props.attorney_status} />
@@ -73,52 +91,57 @@ export default class SchoolBus extends Component {
             <View style={styles.container}>
                 <ScrollView>
 
-                    <VictoryChart width={350} height={300} scale={{ x: "time" }}
+                    <VictoryChart 
+                        // padding={{ top: 0, left: 50, right: 50, bottom: 10 }}
+                        width={350} height={320} scale={{ x: "time" }}
+                        domain={{ y: [0, 100] }}
                         containerComponent={
                             <VictoryZoomContainer responsive={false}
                                 zoomDimension="x"
                                 zoomDomain={this.state.zoomDomain}
                                 onZoomDomainChange={this.handleZoom.bind(this)}
-                            />
-                        }
+                            />}
+                        // containerComponent={<VictoryZoomContainer zoomDomain={{ x: [this.state.min, this.state.max], y: [0, 200] }} />}
+                        
+                        // containerComponent={
+                        //     <VictoryZoomContainer responsive={false}
+                        //         zoomDimension="x"
+                        //         zoomDomain={this.state.zoomDomain}
+                        //         onZoomDomainChange={this.handleZoom.bind(this)}
+                        //     />
+                        // }
                     >
                         <VictoryAxis
                             scale={{ x: "time" }}
+                            label="Hora (HH:MM)"
                             // tickValues specifies both the number of ticks and where
                             // they are placed on the axis
                             // tickValues={[1, 2, 3, 4]}
                             // tickFormat={["Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"]}
                         />
-                        {/* <VictoryAxis
-                    dependentAxis
-                    // tickFormat specifies how ticks should be displayed
-                    tickFormat={(x) => (`$${x / 1000}k`)}
-                /> */}
-                        {/* <VictoryBar
-                            data={data}
-                            x="quarter"
-                            y="earnings"
-                        /> */}
                         <VictoryGroup
-                            colorScale={["tomato", "orange", "gold"]}
+                            colorScale={["red", "blue", "gold"]}
                             >
-                            <VictoryBar
+                            <VictoryLine
                                 style={{
                                     data: { stroke: "tomato" }
                                 }}
                                 data={this.state.x_data}
                             />
-                            <VictoryBar
-                                data={this.state.Y_data}
+                            <VictoryLine
+                                data={this.state.y_data}
                             />
-                            <VictoryBar
+                            <VictoryLine
                                 data={this.state.z_data}
                             />
                         </VictoryGroup>
                     </VictoryChart>
-                    {/* <VictoryChart
-                        padding={{ top: 0, left: 50, right: 50, bottom: 30 }}
-                        width={350} height={90} scale={{ x: "time" }}
+                    <Text>
+                        {"\n"}
+                    </Text>    
+                    <VictoryChart
+                        padding={{ top: 0, left: 30, right: 30, bottom: 30 }}
+                        width={320} height={90} scale={{ x: "time" }}
                         containerComponent={
                             <VictoryBrushContainer responsive={false}
                                 brushDimension="x"
@@ -128,39 +151,24 @@ export default class SchoolBus extends Component {
                         }
                     >
                         <VictoryAxis
-                            tickValues={[
-                                new Date(1985, 1, 1),
-                                new Date(1990, 1, 1),
-                                new Date(1995, 1, 1),
-                                new Date(2000, 1, 1),
-                                new Date(2005, 1, 1),
-                                new Date(2010, 1, 1)
-                            ]}
+                            tickValues={this.state.tickValues}
                             tickFormat={(x) => new Date(x).getFullYear()}
+                            label="Hora (HH:MM)"
                         />
                         <VictoryLine
                             style={{
-                                data: { stroke: "tomato" }
+                                data: { stroke: "blue" }
                             }}
-                            data={[
-                                { x: new Date(1982, 1, 1), y: 125 },
-                                { x: new Date(1987, 1, 1), y: 257 },
-                                { x: new Date(1993, 1, 1), y: 345 },
-                                { x: new Date(1997, 1, 1), y: 515 },
-                                { x: new Date(2001, 1, 1), y: 132 },
-                                { x: new Date(2005, 1, 1), y: 305 },
-                                { x: new Date(2011, 1, 1), y: 270 },
-                                { x: new Date(2015, 1, 1), y: 470 }
-                            ]}
+                            data={this.state.x_data}
                         />
-                    </VictoryChart> */}
-                    <TouchableOpacity style={styles.buttonContainer} onPress={this.handlePress.bind(this)}>
+                    </VictoryChart>
+                    {/* <TouchableOpacity style={styles.buttonContainer} onPress={this.handlePress.bind(this)}>
                         <Text style={styles.buttonText}>
                             mostrar usuario
                     </Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </ScrollView>
-                <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{ color: '#FFF' }} />
+                {/* <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{ color: '#FFF' }} /> */}
             </View>
 
         )

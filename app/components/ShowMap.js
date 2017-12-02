@@ -5,7 +5,8 @@ import {
     Dimensions,
     Button,
     TouchableOpacity,
-    Text
+    Text,
+    Image
 } from 'react-native';
 import MapView from 'react-native-maps'
 import { Actions } from 'react-native-router-flux';
@@ -46,8 +47,8 @@ export default class ShowMap extends Component {
             house_position:{
                 latitude : 0,
                 longitude: 0,
-                latitudeDelta: LATITUD_DELTA,
-                longitudeDelta: LONGITUDE_DELTA
+                latitudeDelta: 0,
+                longitudeDelta: 0
             },
             follow_marker : true,
             user : null
@@ -119,6 +120,13 @@ export default class ShowMap extends Component {
     componentDidMount() {
         this.checkHouseMarker()
         this.checkSchoolBus()
+        this.setState({
+            house_position: {
+                ...this.state.house_position,
+                latitudeDelta: LATITUD_DELTA,
+                longitudeDelta: LONGITUDE_DELTA
+            }
+        })
     }
     distance(lat1, lon1, lat2, lon2) {
         console.log("calculando distancia")
@@ -139,25 +147,25 @@ export default class ShowMap extends Component {
                 longitudeDelta: region.longitudeDelta
             }
         })
-        // if(this.state.follow_marker){
-        //     this.setState({
-        //         position: {
-        //             ...this.state.position,
-        //             latitudeDelta : region.latitudeDelta,
-        //             longitudeDelta : region.longitudeDelta
-        //         }
-        //     })
-        // }
-        // else{
-        //     this.setState({
-        //         regionPosition: {
-        //             latitude : region.latitude,
-        //             longitude : region.longitude,
-        //             latitudeDelta : region.latitudeDelta,
-        //             longitudeDelta : region.longitudeDelta
-        //         }
-        //     })
-        // }
+        if(this.state.follow_marker){
+            this.setState({
+                house_position: {
+                    ...this.state.house_position,
+                    latitudeDelta : region.latitudeDelta,
+                    longitudeDelta : region.longitudeDelta
+                }
+            })
+        }
+        else{
+            this.setState({
+                regionPosition: {
+                    latitude : region.latitude,
+                    longitude : region.longitude,
+                    latitudeDelta : region.latitudeDelta,
+                    longitudeDelta : region.longitudeDelta
+                }
+            })
+        }
     }
     componentWillUnmount() {
         // navigator.geolocation.clearWatch(this.watchID)
@@ -177,21 +185,16 @@ export default class ShowMap extends Component {
                 })
         })
     }
-    touchMarker(e){
-        console.log("tocando el marcado")
-        console.log(this.state)
-        console.log(e.nativeEvent)
-    }
-    moveMarker(e){
-        console.log("terminando de mover")
-        console.log(e.nativeEvent)
-    }
     handlePress(){
+        console.log("handle press")
+        console.log(this.state.follow_marker)
         if(this.state.follow_marker){
             this.setState({ 
                 follow_marker : false,
                 regionPosition: {
-                    ...this.state.position
+                    ...this.state.house_position,
+                    latitudeDelta: this.state.regionPosition.latitudeDelta,
+                    longitudeDelta: this.state.regionPosition.longitudeDelta
                 }
             })
         }
@@ -199,9 +202,9 @@ export default class ShowMap extends Component {
             this.setState({ 
                 follow_marker : true,
                 position : {
-                    ...this.state.regionPosition,
-                    latitude : this.state.position.latitude,
-                    longitude : this.state.position.longitude
+                    ...this.state.house_position,
+                    latitude : this.state.regionPosition.latitude,
+                    longitude: this.state.regionPosition.longitude,
                 }
             })
         }
@@ -226,7 +229,7 @@ export default class ShowMap extends Component {
         /* this.watcher_position() */
         let mapRegion = {}
         if(this.state.follow_marker){
-            mapRegion = this.state.position
+            mapRegion = this.state.house_position
         }
         else{
             mapRegion = this.state.regionPosition
@@ -235,7 +238,7 @@ export default class ShowMap extends Component {
             <View style = {styles.container} >
                 <MapView
                     style = {styles.map}
-                    region={this.state.house_position}
+                    region={mapRegion}
                     onRegionChangeComplete={this.onRegionChange.bind(this)}
                     ref={(ref) => { this.mapRef = ref }}
                 >
@@ -262,6 +265,12 @@ export default class ShowMap extends Component {
                     </MapView.Marker>
 
                 </MapView>
+                <TouchableOpacity style={styles.roundButtom} onPress={this.handlePress.bind(this)}>
+                    <Image
+                        style={{ width: 30, height: 30 }}
+                        // source={require('../../images/follow.png')}
+                    />
+                </TouchableOpacity>
                 {/* <TouchableOpacity style={styles.buttonContainer} onPress = {this.handlePress.bind(this)}>
                     <Text style={styles.buttonText}>
                         Iniciar Viaje
@@ -367,6 +376,20 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 20,
+    },
+    roundButtom: {
+        alignSelf: 'flex-end',
+        left: -20,
+        top: -250,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 50,
+        height: 50,
+        backgroundColor: '#fff',
+        // backgroundColor: '#f10f3c',
+        borderRadius: 100,
     }
   });
 // const styles = StyleSheet.create({

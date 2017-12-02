@@ -16,6 +16,7 @@ export default class SchoolBus extends Component {
           visible : false,
           school_bus : {
               name: "",
+              patent: "",
               in_transit: false
           }
         };
