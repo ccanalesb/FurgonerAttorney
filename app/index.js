@@ -14,6 +14,7 @@ import SchoolBus from './components/SchoolBus'
 import PersonalInfo from './components/PersonalInfo'
 import { firebaseRef } from './services/firebase.js'
 import SchoolBusTabs from './components/SchoolBusTabs'
+import PersonalTabs from './components/PersonalTabs'
 // import NotificationView from './components/notifications/NotificationView'
 
 console.disableYellowBox = true
@@ -74,7 +75,7 @@ export default class FurgonerAttorney extends Component {
               />
               <Scene
                 key="personalinfo"
-                component={PersonalInfo}
+                component={PersonalTabs}
                 title="Información personal"
                 initial
               />

@@ -15,11 +15,13 @@ import { firebaseRef } from '../../services/firebase.js'
 import { sha256 } from 'react-native-sha256';
 
 const window = Dimensions.get('window');
-const uri = 'https://pickaface.net/gallery/avatar/Opi51c74d0125fd4.png';
+// const uri = 'https://pickaface.net/gallery/avatar/Opi51c74d0125fd4.png';
+const uri = 'https://randomuser.me/api/portraits/lego/' + Math.floor(Math.random() * 8)+'.jpg';
 class DrawerContent extends React.Component {
 
   componentWillMount() {
     let user = firebaseRef.auth().currentUser;
+    console.log(user)
     sha256(user.email).then(hash => {
       let search = "Attorney/" + hash + "/personal_info"
       // console.log(search)
@@ -41,6 +43,7 @@ class DrawerContent extends React.Component {
     
     }
   render() {
+    let user = firebaseRef.auth().currentUser;
     return (
       <View style={styles.drawer}>
         {Platform.OS === 'android' ? 
@@ -50,17 +53,23 @@ class DrawerContent extends React.Component {
               style={styles.headerIcon}
               source={{ uri }}
             />
-            <Text style={styles.headerTitle}>Your name</Text>
+            <Text style={styles.headerTitle}>{user.email}</Text>
           </View>
         </TouchableNativeFeedback>
         :
-        < TouchableHighlight style={styles.header} >
+          < TouchableHighlight style={{
+            height: '10%',
+            marginTop: 20,
+            flex: 0.3,
+            backgroundColor: '#f1c40f',
+
+          }} >
           <View>
             <Image
               style={styles.headerIcon}
               source={{ uri }}
             />
-            <Text style={styles.headerTitle}>Your name</Text>
+            <Text style={styles.headerTitle}>{user.email}</Text>
           </View>
         </TouchableHighlight>
         }
