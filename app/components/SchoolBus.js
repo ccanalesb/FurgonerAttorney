@@ -6,21 +6,27 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { firebaseRef } from '../services/firebase.js'
 import { sha256 } from 'react-native-sha256';
 import SchoolBusCard from './SchoolBusCard'
+import Modal from 'react-native-modal'
 
 export default class SchoolBus extends Component {
     constructor(props) {
         super(props);
     
         this.state = {
-          page: 'first',
-          visible : false,
-          school_bus : {
-              name: "",
-              patent: "",
-              in_transit: false
-          }
+            email: '',
+            visible : false,
+            school_bus : {
+                name: "",
+                patent: "",
+                in_transit: false
+            },
+            isModalVisible: false
         };
     }
+    _showModal = () => this.setState({ isModalVisible: true })
+
+    _hideModal = () => this.setState({ isModalVisible: false })
+
     showPop(){
       console.log(this.state)
     }
@@ -148,6 +154,25 @@ export default class SchoolBus extends Component {
             })
         })
     }
+    handleChange(value, key) {
+        console.log(value)
+        console.log(key)
+        if (key == "correo") {
+            this.setState({ email: value });
+        }
+    }
+    addEmail(){
+        console.log(this.state)
+        console.log(this.state.email.toLowerCase())
+        if(this.state.email != ""){
+            this.searchEmail(this.state.email.toLowerCase())
+            this._hideModal()
+        }
+        else{
+            alert("El correo no puede estar vacío")
+        }
+        // this.setState({ isModalVisible: false })
+    }
     render() {
 
         const { page } = this.state;
@@ -157,13 +182,11 @@ export default class SchoolBus extends Component {
         return (
           <View style={styles.container}>
             <ScrollView>
-                {/* <List style={styles.list}> */}
                 {(this.state.school_bus.name === "") ? null:
                     <SchoolBusCard school_bus = {this.state.school_bus}/>
                 }
-                {/* </List> */}
             </ScrollView>
-            <View style={styles.form}>
+            {/* <View style={styles.form}>
                         <View style={styles.formContainer}>
                             <TouchableOpacity style={styles.buttonContainer} onPress={()=> this.setState({promptVisible:true})}>
                                 <Text style={styles.buttonText}> 
@@ -171,8 +194,91 @@ export default class SchoolBus extends Component {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                </View>
-            <Prompt
+                </View> */}
+                <View style={styles.form}>
+                    <View style={styles.formContainer}>
+                        <TouchableOpacity onPress={this._showModal} style={styles.buttonContainer}>
+                            <Text style={styles.buttonText}>
+                                Agregar furgón
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View >
+                <Modal 
+                    isVisible={this.state.isModalVisible}
+                    style={{
+                        // backgroundColor: '#fafafa', 
+                        flex: 1,
+                        // justifyContent: 'center',
+                        // alignItems: 'center'
+                    }}
+                >
+
+                    <List style={styles.list} renderHeader={() => 'Correo del furgón'}>
+                        <InputItem
+                            type="text"
+                            editable={this.state.editInfo}
+                            placeholder="Correo"
+                            defaultValue = {this.state.email}
+                            onChange={(value) => this.handleChange(value, "correo")}
+                            key="correo"
+                        >
+                            Correo:
+                    </InputItem>
+                    <View style={{
+                            backgroundColor: '#fafafa'
+                    }}>
+                            <View style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                justifyContent: 'space-between'
+                            }}>
+                            <TouchableOpacity onPress={this._hideModal} 
+                            style={{
+                                backgroundColor: '#FFB74D',
+                                paddingVertical: 30,
+                                width: '50%',
+                            }}>
+                                <Text style={{
+                                    textAlign: 'center',
+                                    color: 'black',
+                                    fontWeight: '700',
+                                    marginTop: -10
+                                }}>
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={this.addEmail.bind(this)}
+                                style={{
+                                    backgroundColor: '#f1c40f',
+                                    paddingVertical: 30,
+                                    width: '50%'
+                                }}>
+                                <Text style={{
+                                    textAlign: 'center',
+                                    color: 'black',
+                                    fontWeight: '700',
+                                    marginTop: -10
+                                }}>
+                                    Agregar
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View >
+                        {/* <InputItem
+                            type="text"
+                            editable={this.state.editInfo}
+                            placeholder="Apellido"
+                            defaultValue={this.state.attorney.last_name}
+                            onChange={(value) => this.handleChange(value, "last_name")}
+                        >
+                            Apellido:
+                    </InputItem> */}
+
+                    </List>
+
+                </Modal>
+            {/* <Prompt
               title="Ingrese correo del furgón"
               placeholder="example@mail.com"
               defaultValue="canaleschiko@gmail.com"
@@ -181,7 +287,7 @@ export default class SchoolBus extends Component {
                 promptVisible: false,
                 message: "You cancelled"
               }) }
-              onSubmit={ this.searchEmail.bind(this) }/>     
+              onSubmit={ this.searchEmail.bind(this) }/>      */}
               <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{color: '#FFF'}} />       
           </View>  
         )
@@ -221,7 +327,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer:{
       backgroundColor: '#f1c40f',
-      paddingVertical: 20
+      paddingVertical: 20,
   },
   buttonRegisterContainer:{
       backgroundColor: '#FFB74D',

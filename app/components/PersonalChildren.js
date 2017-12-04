@@ -7,6 +7,7 @@ import { firebaseRef } from '../services/firebase.js'
 import { sha256 } from 'react-native-sha256';
 import ChildrenCard from './ChildrenCard'
 import uuid from 'react-native-uuid';
+import Modal from 'react-native-modal'
 
 export default class SchoolBus extends Component {
     constructor(props) {
@@ -19,13 +20,23 @@ export default class SchoolBus extends Component {
                 name: "",
                 patent: "",
                 in_transit: false
+            },
+            isModalVisible: false,
+            addchild:{
+                name: "",
+                last_name: "",
+                grade: ""
             }
         };
     }
+    _showModal = () => this.setState({ isModalVisible: true })
+
+    _hideModal = () => this.setState({ isModalVisible: false })
+
     showPop() {
         console.log(this.state)
     }
-    addChildren(value){
+    addChildren(){
         var user = firebaseRef.auth().currentUser;
         console.log(user.displayName)
         firebaseRef.database().ref('Attorney/' + user.displayName + '/children').once("value")
@@ -33,7 +44,11 @@ export default class SchoolBus extends Component {
             if (snapshot.val() == null) {
                 console.log("ESTOY VACIO")
                 child_obj = {}
-                child_obj[uuid.v4()]= {name: value}
+                child_obj[uuid.v4()]= {
+                    name: this.state.addchild.name, 
+                    last_name: this.state.addchild.last_name,
+                    grade: this.state.addchild.grade
+                }
                 firebaseRef.database().ref('Attorney/' + user.displayName).update({
                     children: child_obj
                 })
@@ -41,7 +56,11 @@ export default class SchoolBus extends Component {
             else{
                 console.log("NO ESTOY VACIO")  
                 child_obj = snapshot.val()      
-                child_obj[uuid.v4()] = { name: value }
+                child_obj[uuid.v4()] = {
+                    name: this.state.addchild.name,
+                    last_name: this.state.addchild.last_name,
+                    grade: this.state.addchild.grade
+                }
                 firebaseRef.database().ref('Attorney/' + user.displayName).update({
                     children: child_obj
                 })
@@ -49,6 +68,11 @@ export default class SchoolBus extends Component {
         })
         .then(()=>{
             this.get_children()
+            child = this.state.addchild
+            child.name = ""
+            child.last_name = ""
+            child.grade = ""
+            this.setState({ addchild: child })
         })
         .catch((error) => {
             // Handle Errors here.
@@ -56,18 +80,11 @@ export default class SchoolBus extends Component {
             console.log(error.message)
             alert(JSON.stringify(error.message))
         })
-        this.setState({
-            promptVisible: false,
-            message: `You said "${value}"`,
-            visible: false
-        })
         
         console.log(this.state)
     }
     componentDidMount() {
-        
         this.get_children()
-        
         console.log(this.state)
     }
     get_children(){
@@ -83,7 +100,6 @@ export default class SchoolBus extends Component {
                             let child = {}
                             child = snapshot.val()[key]
                             children.push(child);
-                            
                         }
                         else {
                             console.log("object already exists")
@@ -102,14 +118,33 @@ export default class SchoolBus extends Component {
                 alert(JSON.stringify(error.message))
             })
     }
-    render() {
+    addChildrentodb(){
+        this.addChildren()
+        this._hideModal()
 
+        console.log(this.state)
+    }
+    handleChange(value, key) {
+        console.log(value)
+        console.log(key)
+        child = this.state.addchild
+        if (key == "name") {
+            child.name = value
+            this.setState({ addchild: child });
+        }
+        if (key == "last_name") {
+            child.last_name = value
+            this.setState({ addchild: child });
+        }
+        if (key == "grade") {
+            child.grade = value
+            this.setState({ addchild: child });
+        }
+        console.log(this.state)
+    }
+    render() {
         const { page } = this.state;
-        // const tabbarStyles = [styles.tabbar];
-        // if (Platform.OS === 'android') tabbarStyles.push(styles.androidTabbar);
         let children = this.state.children
-        // children.map((e, i) => (console.log(e)))
-        // console.log(children.length)
         return (
             <View style={styles.container}>
                 <ScrollView>
@@ -117,28 +152,87 @@ export default class SchoolBus extends Component {
                         {
                             Object.values(this.state.children).map((e, i) =>
                                 <ChildrenCard key={i} children={e}  />
-                            )}
+                            )
+                        }
                     </List>
                 </ScrollView>
                 <View style={styles.form}>
                     <View style={styles.formContainer}>
-                        <TouchableOpacity style={styles.buttonContainer} onPress={() => this.setState({ promptVisible: true })}>
+                        <TouchableOpacity onPress={this._showModal} style={styles.buttonContainer}>
                             <Text style={styles.buttonText}>
                                 Agregar Hijo
-                                </Text>
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-                <Prompt
-                    title="Ingrese nombre del Hijo"
-                    placeholder="nombre"
-                    defaultValue="pedrito"
-                    visible={this.state.promptVisible}
-                    onCancel={() => this.setState({
-                        promptVisible: false,
-                        message: "You cancelled"
-                    })}
-                    onSubmit={this.addChildren.bind(this)} />
+                <Modal
+                    isVisible={this.state.isModalVisible}
+                    style={{flex: 1}}>
+                    <List style={styles.list} renderHeader={() => 'Datos de su hijo a agregar'}>
+                        <InputItem
+                            type="text"
+                            placeholder="Nombre"
+                            onChange={(value) => this.handleChange(value, "name")}
+                            key="name"
+                        >
+                            Nombre:
+                        </InputItem>
+                        <InputItem
+                            type="text"
+                            placeholder="Apellido"
+                            onChange={(value) => this.handleChange(value, "last_name")}
+                            key="last_name"
+                        >
+                            Apellido:
+                        </InputItem>
+                        <InputItem
+                            type="text"
+                            placeholder="Curso"
+                            onChange={(value) => this.handleChange(value, "grade")}
+                            key="grade"
+                        >
+                            Curso:
+                        </InputItem>
+                        <View style={{backgroundColor: '#fafafa'}}>
+                            <View style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                justifyContent: 'space-between'
+                            }}>
+                                <TouchableOpacity onPress={this._hideModal}
+                                    style={{
+                                        backgroundColor: '#FFB74D',
+                                        paddingVertical: 30,
+                                        width: '50%',
+                                    }}>
+                                    <Text style={{
+                                        textAlign: 'center',
+                                        color: 'black',
+                                        fontWeight: '700',
+                                        marginTop: -10
+                                    }}>
+                                        Cancelar
+                                </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={this.addChildrentodb.bind(this)}
+                                    style={{
+                                        backgroundColor: '#f1c40f',
+                                        paddingVertical: 30,
+                                        width: '50%'
+                                    }}>
+                                    <Text style={{
+                                        textAlign: 'center',
+                                        color: 'black',
+                                        fontWeight: '700',
+                                        marginTop: -10
+                                    }}>
+                                        Agregar
+                                </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View >
+                    </List>
+                </Modal>
                 <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{ color: '#FFF' }} />
             </View>
         )
