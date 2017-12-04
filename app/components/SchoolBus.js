@@ -184,34 +184,6 @@ export default class SchoolBus extends Component {
               onSubmit={ this.searchEmail.bind(this) }/>     
               <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{color: '#FFF'}} />       
           </View>  
-          
-
-
-               //<View style={styles.container}>
-        //     <NavBar leftContent="back"
-        //   mode="light"
-        //   onLeftClick={() => console.log('onLeftClick')}
-        //   rightContent={[
-        //     <Icon key="0" type="search" style={{ marginRight: '0.32rem' }} />,
-        //     <Icon key="1" type="ellipsis" />,
-        //   ]}
-        // >NavBar</NavBar>        
-        //     <Tabs
-        //       selected={page}
-        //       style={tabbarStyles}
-        //       selectedStyle={{color:'red'}} onSelect={el=>this.setState({page:el.props.name})}
-        //     >
-        //         <Text name="first">
-        //           First
-        //         </Text>
-        //         <Text name="second">Second</Text>
-        //         <Text name="third">Third</Text>
-        //     </Tabs>
-    
-        //     <Button> Start </Button>
-        //     <Text>CodeSharing App</Text>
-        //     <Text>{page}</Text>
-        //   </View>
         )
       }
 }    
