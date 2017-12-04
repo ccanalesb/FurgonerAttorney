@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet,TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet,TouchableOpacity, ScrollView, Platform } from 'react-native';
 import Prompt from 'react-native-prompt';
 import { DatePicker, List, InputItem, Button, Card } from 'antd-mobile';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -206,12 +206,9 @@ export default class SchoolBus extends Component {
                 </View >
                 <Modal 
                     isVisible={this.state.isModalVisible}
-                    style={{
-                        // backgroundColor: '#fafafa', 
-                        flex: 1,
-                        // justifyContent: 'center',
-                        // alignItems: 'center'
-                    }}
+                    onBackButtonPress={() => this._hideModal()}
+                    onBackdropPress={() => this._hideModal()}
+                    style={{flex: 1}}
                 >
 
                     <List style={styles.list} renderHeader={() => 'Correo del furgón'}>
@@ -225,69 +222,54 @@ export default class SchoolBus extends Component {
                         >
                             Correo:
                     </InputItem>
+                    </List>
                     <View style={{
-                            backgroundColor: '#fafafa'
-                    }}>
-                            <View style={{
-                                flex: 1,
+                        ...Platform.select({
+                            ios: {
+                                flex: 0.1,
                                 flexDirection: 'row',
-                                justifyContent: 'space-between'
-                            }}>
-                            <TouchableOpacity onPress={this._hideModal} 
+                                justifyContent: 'space-between',
+                            },
+                            android: {
+                                flex: 0.1,
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                            }
+                        })
+                    }}>
+                        <TouchableOpacity onPress={this._hideModal}
                             style={{
                                 backgroundColor: '#FFB74D',
                                 paddingVertical: 30,
                                 width: '50%',
                             }}>
-                                <Text style={{
-                                    textAlign: 'center',
-                                    color: 'black',
-                                    fontWeight: '700',
-                                    marginTop: -10
-                                }}>
-                                    Cancelar
+                            <Text style={{
+                                textAlign: 'center',
+                                color: 'black',
+                                fontWeight: '700',
+                                marginTop: -10
+                            }}>
+                                Cancelar
                                 </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={this.addEmail.bind(this)}
-                                style={{
-                                    backgroundColor: '#f1c40f',
-                                    paddingVertical: 30,
-                                    width: '50%'
-                                }}>
-                                <Text style={{
-                                    textAlign: 'center',
-                                    color: 'black',
-                                    fontWeight: '700',
-                                    marginTop: -10
-                                }}>
-                                    Agregar
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={this.addEmail.bind(this)}
+                            style={{
+                                backgroundColor: '#f1c40f',
+                                paddingVertical: 30,
+                                width: '50%'
+                            }}>
+                            <Text style={{
+                                textAlign: 'center',
+                                color: 'black',
+                                fontWeight: '700',
+                                marginTop: -10
+                            }}>
+                                Agregar
                                 </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View >
-                        {/* <InputItem
-                            type="text"
-                            editable={this.state.editInfo}
-                            placeholder="Apellido"
-                            defaultValue={this.state.attorney.last_name}
-                            onChange={(value) => this.handleChange(value, "last_name")}
-                        >
-                            Apellido:
-                    </InputItem> */}
-
-                    </List>
+                        </TouchableOpacity>
+                    </View>
 
                 </Modal>
-            {/* <Prompt
-              title="Ingrese correo del furgón"
-              placeholder="example@mail.com"
-              defaultValue="canaleschiko@gmail.com"
-              visible={ this.state.promptVisible }
-              onCancel={ () => this.setState({
-                promptVisible: false,
-                message: "You cancelled"
-              }) }
-              onSubmit={ this.searchEmail.bind(this) }/>      */}
               <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{color: '#FFF'}} />       
           </View>  
         )

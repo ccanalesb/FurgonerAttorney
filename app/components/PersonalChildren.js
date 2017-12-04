@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import Prompt from 'react-native-prompt';
 import { DatePicker, List, InputItem, Button, Card } from 'antd-mobile';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -167,7 +167,10 @@ export default class SchoolBus extends Component {
                 </View>
                 <Modal
                     isVisible={this.state.isModalVisible}
-                    style={{flex: 1}}>
+                    style={{flex: 1}}
+                    onBackButtonPress={() => this._hideModal()}
+                    onBackdropPress={() => this._hideModal()}
+                    >
                     <List style={styles.list} renderHeader={() => 'Datos de su hijo a agregar'}>
                         <InputItem
                             type="text"
@@ -193,45 +196,55 @@ export default class SchoolBus extends Component {
                         >
                             Curso:
                         </InputItem>
-                        <View style={{backgroundColor: '#fafafa'}}>
-                            <View style={{
-                                flex: 1,
-                                flexDirection: 'row',
-                                justifyContent: 'space-between'
-                            }}>
-                                <TouchableOpacity onPress={this._hideModal}
-                                    style={{
-                                        backgroundColor: '#FFB74D',
-                                        paddingVertical: 30,
-                                        width: '50%',
-                                    }}>
-                                    <Text style={{
-                                        textAlign: 'center',
-                                        color: 'black',
-                                        fontWeight: '700',
-                                        marginTop: -10
-                                    }}>
-                                        Cancelar
-                                </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={this.addChildrentodb.bind(this)}
-                                    style={{
-                                        backgroundColor: '#f1c40f',
-                                        paddingVertical: 30,
-                                        width: '50%'
-                                    }}>
-                                    <Text style={{
-                                        textAlign: 'center',
-                                        color: 'black',
-                                        fontWeight: '700',
-                                        marginTop: -10
-                                    }}>
-                                        Agregar
-                                </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View >
                     </List>
+                        <View style={{
+
+                            ...Platform.select({
+                                ios: {
+                                    flex: 0.1, 
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                },
+                                android: {
+                                    flex: 0.1,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }
+                            })
+                        }}>
+                    
+                        <TouchableOpacity onPress={this._hideModal}
+                            style={{
+                                backgroundColor: '#FFB74D',
+                                paddingVertical: 30,
+                                width: '50%',
+                            }}>
+                            <Text style={{
+                                textAlign: 'center',
+                                color: 'black',
+                                fontWeight: '700',
+                                marginTop: -10
+                            }}>
+                                Cancelar
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={this.addChildrentodb.bind(this)}
+                            style={{
+                                backgroundColor: '#f1c40f',
+                                paddingVertical: 30,
+                                width: '50%'
+                            }}>
+                            <Text style={{
+                                textAlign: 'center',
+                                color: 'black',
+                                fontWeight: '700',
+                                marginTop: -10
+                            }}>
+                                Agregar
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    
                 </Modal>
                 <Spinner visible={this.state.visible} textContent={"Cargando..."} textStyle={{ color: '#FFF' }} />
             </View>
