@@ -56,31 +56,28 @@ export default class SchoolBus extends Component {
         let temp_z_data = this.state.z_data
         firebaseRef.database().ref('School_bus/' + user.photoURL + '/stadistic/this_week/'+day).once("value")
             .then((snapshot) => {
+                let last_time = 0
                 snapshot.val().map((e,i) =>{
                     if(i == 0){
                         this.setState({ min: this.formatTime(e["timestamp"]) })
+                        last_time = e["timestamp"]
                     }
-                    temp_x_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["X"])})
-                    temp_y_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["Y"])})
-                    temp_z_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["Z"])})
+                    if(e["timestamp"]>last_time){
+                        temp_x_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["X"])})
+                        temp_y_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["Y"])})
+                        temp_z_data.push({ x: this.formatTime(e["timestamp"]) , y: parseInt(e["Z"])})
+                        last_time = e["timestamp"]+10
+                    }
                 }
                 )
             })
             .then(()=>{
-                console.log(temp_x_data[temp_x_data.length-1]["x"])
-                how_many = parseInt(temp_x_data.length / 6)
-                tickValues = []
-                for (let index = 0; index < temp_x_data.length; index++) {
-                    
-                    tickValues.push(temp_x_data[index]["x"])
-                    index += how_many
-                }
+                max = temp_x_data[temp_x_data.length - 1]["x"]
                 this.setState({
                     x_data: temp_x_data,
                     y_data: temp_y_data,
                     z_data: temp_z_data,
-                    max: temp_x_data[temp_x_data.length-1]["x"],
-                    tickValues: tickValues
+                    max: max
                 })
                 console.log(this.state)
             })
@@ -93,19 +90,21 @@ export default class SchoolBus extends Component {
     }
     get_suddenness(){
         var user = firebaseRef.auth().currentUser;
-        firebaseRef.database().ref('School_bus/' + user.photoURL + '/stadistic/this_week').once("value")
+        firebaseRef.database().ref('School_bus/' + user.photoURL + '/stadistic/historic').once("value")
             .then((snapshot) => {
                 days = snapshot.val()
                 let suddenness = this.state.suddenness
-                for (const [index,value] of this.state.days.entries()) {                    
-                    days[value].map((e,i)=>{
-                        avg = (parseInt(e["X"]) + parseInt(e["Y"]) + parseInt(e["Z"]))/3
-                        if (avg > 50){
-                            points = suddenness[index].y
-                            points = points + 1
-                            suddenness[index].y = points
-                        }
-                    })
+                for (const [index,value] of this.state.days.entries()) {     
+                    if (days[value] != null){               
+                        days[value].map((e,i)=>{
+                            avg = (parseInt(e["X"]) + parseInt(e["Y"]) + parseInt(e["Z"]))/3
+                            if (avg > 30){
+                                points = suddenness[index].y
+                                points = points + 1
+                                suddenness[index].y = points
+                            }
+                        })
+                    }
                 }
                 this.setState({ suddenness: suddenness })
             })
@@ -153,16 +152,16 @@ export default class SchoolBus extends Component {
                                     colorScale={["red", "blue", "gold"]}
                                 >
                                     <VictoryLine
-                                        style={{
-                                            data: { stroke: "tomato" }
-                                        }}
                                         data={this.state.x_data}
+                                        interpolation="natural"
                                     />
                                     <VictoryLine
                                         data={this.state.y_data}
+                                        interpolation="natural"
                                     />
                                     <VictoryLine
                                         data={this.state.z_data}
+                                        interpolation="natural"
                                     />
                                 </VictoryGroup>
                             </VictoryChart>
@@ -184,8 +183,9 @@ export default class SchoolBus extends Component {
                                 }
                             >
                                 <VictoryAxis
-                                    tickValues={this.state.tickValues}
-                                    tickFormat={(x) => new Date(x).getFullYear()}
+                                    scale={{ x: "time" }}
+                                    // tickValues={this.state.tickValues}
+                                    // tickFormat={(x) => new Date(x).getFullYear()}
                                     label="Hora (HH:MM)"
                                 />
                                 <VictoryLine
